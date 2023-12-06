@@ -51,6 +51,13 @@ public class AppRunner {
                 allowProducts.add(products.get(i));
             }
         }
+        if (allowProducts.size() == 0) {
+            print("""
+                                
+                    У вас недостаточно денег
+                    """);
+            isExit = true;
+        }
         return allowProducts;
     }
 
@@ -59,17 +66,18 @@ public class AppRunner {
         print(" h - Выйти");
         print(" p - Пополнить баланс");
         String action = fromConsole().substring(0, 1);
+        System.out.println("action = " + action);
         try {
+            if ("h".equalsIgnoreCase(action)) {
+                isExit = true;
+                print("Завершение работы");
+            } else if ("p".equalsIgnoreCase(action)) {
+                print("Пополняем баланс");
+            }
             for (int i = 0; i < products.size(); i++) {
                 if (products.get(i).getActionLetter().equals(ActionLetter.valueOf(action.toUpperCase()))) {
                     coinAcceptor.setAmount(coinAcceptor.getAmount() - products.get(i).getPrice());
                     print("Вы купили " + products.get(i).getName());
-                    break;
-                } else if ("h".equalsIgnoreCase(action)) {
-                    isExit = true;
-                    break;
-                } else if ("p".equalsIgnoreCase(action)){
-                    print("Пополняем баланс");
                     break;
                 }
             }
