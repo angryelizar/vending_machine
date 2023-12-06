@@ -1,4 +1,5 @@
 import enums.ActionLetter;
+import enums.PaymentMethodWord;
 import exceptions.ErrorException;
 import model.*;
 import util.UniversalArray;
@@ -10,9 +11,13 @@ public class AppRunner {
 
     private final UniversalArray<Product> products = new UniversalArrayImpl<>();
 
-    private final CoinAcceptor coinAcceptor;
+    private String paymentMethod;
+
+    private CoinAcceptor coinAcceptor;
+    private BankCard bankCard;
 
     private static boolean isExit = false;
+    UniversalArray<Product> allowProducts;
 
     private AppRunner() {
         products.addAll(new Product[]{
@@ -23,7 +28,6 @@ public class AppRunner {
                 new Mars(ActionLetter.F, 80),
                 new Pistachios(ActionLetter.G, 130)
         });
-        coinAcceptor = new CoinAcceptor(20);
     }
 
     public static void run() {
@@ -37,13 +41,17 @@ public class AppRunner {
     private void startSimulation() {
         print("В автомате доступны:");
         showProducts(products);
-        print("Монет на сумму: " + coinAcceptor.getAmount());
-        UniversalArray<Product> allowProducts = new UniversalArrayImpl<>();
+        if (getPaymentMethod().equals(PaymentMethodWord.CARD.getValue())) {
+            print("Денег на карте: " + bankCard.getAmount());
+        } else if (getPaymentMethod().equals(PaymentMethodWord.COINS.getValue())) {
+            print("Монет на сумму: " + coinAcceptor.getAmount());
+        }
+        allowProducts = new UniversalArrayImpl<>();
         allowProducts.addAll(getAllowedProducts().toArray());
         chooseAction(allowProducts);
     }
 
-    private void choosePaymentMethod(){
+    private void choosePaymentMethod() {
         print("Выберите метод оплаты");
         print("""
                 1 - Банковская карта
@@ -52,31 +60,46 @@ public class AppRunner {
         String answer = fromConsole().trim();
         try {
             int answerToInt = Integer.parseInt(answer);
-            if (answerToInt <= 0 || answerToInt > 2){
+            if (answerToInt <= 0 || answerToInt > 2) {
                 throw new ErrorException();
             }
-        } catch (NumberFormatException numberFormatException){
-            numberFormatException.getMessage();
+            switch (answerToInt) {
+                case 1:
+                    setPaymentMethod(PaymentMethodWord.CARD.getValue());
+                    bankCard = new BankCard(1000);
+                    break;
+                case 2:
+                    setPaymentMethod(PaymentMethodWord.COINS.getValue());
+                    coinAcceptor = new CoinAcceptor(100);
+                    break;
+                default:
+                    print("404...");
+            }
+        } catch (NumberFormatException numberFormatException) {
             System.err.println("Вводите только цифры!");
             choosePaymentMethod();
         } catch (ErrorException e) {
             System.err.println("Такого способа оплаты нет!");
             choosePaymentMethod();
         }
-
     }
 
     private UniversalArray<Product> getAllowedProducts() {
         UniversalArray<Product> allowProducts = new UniversalArrayImpl<>();
         for (int i = 0; i < products.size(); i++) {
-            if (coinAcceptor.getAmount() >= products.get(i).getPrice()) {
-                allowProducts.add(products.get(i));
+            if (paymentMethod.equals(PaymentMethodWord.CARD.getValue())){
+                if (bankCard.getAmount() >= products.get(i).getPrice()) {
+                    allowProducts.add(products.get(i));
+                }
+            } else if (paymentMethod.equals(PaymentMethodWord.COINS.getValue())){
+                if (coinAcceptor.getAmount() >= products.get(i).getPrice()) {
+                    allowProducts.add(products.get(i));
+                }
             }
         }
         if (allowProducts.size() == 0) {
-            print("""
-                                
-                    У вас недостаточно денег
+            print("""                    
+                    У вас недостаточно денег!
                     """);
             isExit = true;
         }
@@ -91,19 +114,23 @@ public class AppRunner {
         try {
             if ("h".equalsIgnoreCase(action)) {
                 isExit = true;
-                print("Завершение работы");
+                print("Завершение работы...");
             } else if ("a".equalsIgnoreCase(action)) {
-                print("Пополняем баланс");
+                print("Пополняем баланс...");
             }
             for (int i = 0; i < products.size(); i++) {
                 if (products.get(i).getActionLetter().equals(ActionLetter.valueOf(action.toUpperCase()))) {
-                    coinAcceptor.setAmount(coinAcceptor.getAmount() - products.get(i).getPrice());
+                    if (paymentMethod.equals(PaymentMethodWord.CARD.getValue())){
+                        bankCard.setAmount(bankCard.getAmount() - products.get(i).getPrice());
+                    } else if (paymentMethod.equals(PaymentMethodWord.COINS.getValue())){
+                        coinAcceptor.setAmount(coinAcceptor.getAmount() - products.get(i).getPrice());
+                    }
                     print("Вы купили " + products.get(i).getName());
                     break;
                 }
             }
         } catch (IllegalArgumentException e) {
-            print("Недопустимая буква. Попрбуйте еще раз.");
+            print("Недопустимая буква. Попробуйте еще раз.");
             chooseAction(products);
         }
     }
@@ -126,5 +153,13 @@ public class AppRunner {
 
     private void print(String msg) {
         System.out.println(msg);
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }
