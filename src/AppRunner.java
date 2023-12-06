@@ -22,7 +22,7 @@ public class AppRunner {
                 new Mars(ActionLetter.F, 80),
                 new Pistachios(ActionLetter.G, 130)
         });
-        coinAcceptor = new CoinAcceptor(100);
+        coinAcceptor = new CoinAcceptor(0);
     }
 
     public static void run() {
@@ -57,6 +57,7 @@ public class AppRunner {
     private void chooseAction(UniversalArray<Product> products) {
         showActions(products);
         print(" h - Выйти");
+        print(" p - Пополнить баланс");
         String action = fromConsole().substring(0, 1);
         try {
             for (int i = 0; i < products.size(); i++) {
@@ -66,6 +67,9 @@ public class AppRunner {
                     break;
                 } else if ("h".equalsIgnoreCase(action)) {
                     isExit = true;
+                    break;
+                } else if ("p".equalsIgnoreCase(action)){
+                    print("Пополняем баланс");
                     break;
                 }
             }
