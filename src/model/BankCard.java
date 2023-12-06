@@ -1,7 +1,5 @@
 package model;
 
-public class BankCard extends CoinAcceptor{
-    public BankCard(int amount) {
-        super(amount);
-    }
+public class BankCard extends PaymentMethod {
+    private int amount;
 }

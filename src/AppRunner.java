@@ -1,4 +1,5 @@
 import enums.ActionLetter;
+import exceptions.ErrorException;
 import model.*;
 import util.UniversalArray;
 import util.UniversalArrayImpl;
@@ -22,11 +23,12 @@ public class AppRunner {
                 new Mars(ActionLetter.F, 80),
                 new Pistachios(ActionLetter.G, 130)
         });
-        coinAcceptor = new CoinAcceptor(0);
+        coinAcceptor = new CoinAcceptor(20);
     }
 
     public static void run() {
         AppRunner app = new AppRunner();
+        app.choosePaymentMethod();
         while (!isExit) {
             app.startSimulation();
         }
@@ -35,12 +37,32 @@ public class AppRunner {
     private void startSimulation() {
         print("В автомате доступны:");
         showProducts(products);
-
         print("Монет на сумму: " + coinAcceptor.getAmount());
-
         UniversalArray<Product> allowProducts = new UniversalArrayImpl<>();
         allowProducts.addAll(getAllowedProducts().toArray());
         chooseAction(allowProducts);
+    }
+
+    private void choosePaymentMethod(){
+        print("Выберите метод оплаты");
+        print("""
+                1 - Банковская карта
+                2 - Монеты
+                """);
+        String answer = fromConsole().trim();
+        try {
+            int answerToInt = Integer.parseInt(answer);
+            if (answerToInt <= 0 || answerToInt > 2){
+                throw new ErrorException();
+            }
+        } catch (NumberFormatException numberFormatException){
+            numberFormatException.getMessage();
+            System.err.println("Вводите только цифры!");
+            choosePaymentMethod();
+        } catch (ErrorException e) {
+            System.err.println("Такого способа оплаты нет!");
+            choosePaymentMethod();
+        }
 
     }
 
@@ -62,16 +84,15 @@ public class AppRunner {
     }
 
     private void chooseAction(UniversalArray<Product> products) {
+        print(" a - Пополнить баланс");
         showActions(products);
         print(" h - Выйти");
-        print(" p - Пополнить баланс");
         String action = fromConsole().substring(0, 1);
-        System.out.println("action = " + action);
         try {
             if ("h".equalsIgnoreCase(action)) {
                 isExit = true;
                 print("Завершение работы");
-            } else if ("p".equalsIgnoreCase(action)) {
+            } else if ("a".equalsIgnoreCase(action)) {
                 print("Пополняем баланс");
             }
             for (int i = 0; i < products.size(); i++) {
@@ -85,8 +106,6 @@ public class AppRunner {
             print("Недопустимая буква. Попрбуйте еще раз.");
             chooseAction(products);
         }
-
-
     }
 
     private void showActions(UniversalArray<Product> products) {
