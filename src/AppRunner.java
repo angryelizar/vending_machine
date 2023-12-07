@@ -115,7 +115,7 @@ public class AppRunner {
                 }
             }
         } else if (paymentMethod.equals(PaymentMethodWord.CARD.getValue())) {
-            System.err.println("Вы не можете пополнить баланс своей карты - получите ЗП!");
+            System.err.println("\nВы не можете пополнить баланс своей карты - получите ЗП!\n");
             startSimulation();
         }
     }
@@ -140,8 +140,9 @@ public class AppRunner {
         print("\n a - Пополнить баланс");
         showActions(products);
         print(" h - Выйти\n");
-        String action = fromConsole().substring(0, 1);
+
         try {
+            String action = fromConsole().substring(0, 1);
             if ("h".equalsIgnoreCase(action)) {
                 isExit = true;
                 print("Завершение работы...");
@@ -156,12 +157,15 @@ public class AppRunner {
                     } else if (paymentMethod.equals(PaymentMethodWord.COINS.getValue())) {
                         coins.setAmount(coins.getAmount() - products.get(i).getPrice());
                     }
-                    print("Вы купили " + products.get(i).getName());
+                    print("\nВы купили " + products.get(i).getName() + "\n");
                     break;
                 }
             }
         } catch (IllegalArgumentException ErrorException) {
             print("Недопустимая буква. Попробуйте еще раз.");
+            chooseAction(products);
+        } catch (StringIndexOutOfBoundsException stringIndexOutOfBoundsException){
+            print("Пустая строка! Повторите ввод!");
             chooseAction(products);
         }
     }
