@@ -1,0 +1,8 @@
+git clone https://github.com/angryelizar/vending_machine.git
+git checkout
+git branch
+git checkout home_work_25
+git push origin home_work_25
+git checkout master
+git merge home_work_25
+git push
