@@ -2,7 +2,8 @@ package enums;
 
 public enum PaymentMethodWord {
     COINS("Монеты"),
-    CARD("Банковская карта");
+    CARD("Банковская карта"),
+    NONE("Не указан");
 
     private final String value;
 
